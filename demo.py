@@ -9,7 +9,7 @@ from modules.keypoints import extract_keypoints, group_keypoints
 from modules.load_state import load_state
 from modules.pose import Pose, track_poses
 from val import normalize, pad_width
-
+import pafy
 
 class ImageReader(object):
     def __init__(self, file_names):
@@ -31,12 +31,13 @@ class ImageReader(object):
 
 
 class VideoReader(object):
-    def __init__(self, file_name):
-        self.file_name = file_name
-        try:  # OpenCV needs int to read from webcam
-            self.file_name = int(file_name)
-        except ValueError:
-            pass
+    def __init__(self, video_url, is_youtube):
+        if is_youtube:
+            video = pafy.new(video_url)
+            self.best = video.getbest(preftype="mp4")
+            self.file_name = self.best.url
+        else:  # OpenCV needs int to read from webcam
+            self.file_name = video_url
 
     def __iter__(self):
         self.cap = cv2.VideoCapture(self.file_name)
@@ -143,9 +144,10 @@ if __name__ == '__main__':
                        Please, consider c++ demo for the best performance.''')
     parser.add_argument('--checkpoint-path', type=str, required=True, help='path to the checkpoint')
     parser.add_argument('--height-size', type=int, default=256, help='network input layer height size')
-    parser.add_argument('--video', type=str, default='', help='path to video file or camera id')
+    parser.add_argument('--video', type=str, default="https://www.youtube.com/watch?v=HVaeORt4e-w", help='path to video file or camera id')
     parser.add_argument('--images', nargs='+', default='', help='path to input image(s)')
     parser.add_argument('--cpu', action='store_true', help='run network inference on cpu')
+    parser.add_argument('--is-youtube', action='store_true', help='run network inference on cpu')
     parser.add_argument('--track', type=int, default=1, help='track pose id in video')
     parser.add_argument('--smooth', type=int, default=1, help='smooth pose keypoints')
     args = parser.parse_args()
@@ -159,7 +161,7 @@ if __name__ == '__main__':
 
     frame_provider = ImageReader(args.images)
     if args.video != '':
-        frame_provider = VideoReader(args.video)
+        frame_provider = VideoReader(args.video, args.is_youtube)
     else:
         args.track = 0
 
