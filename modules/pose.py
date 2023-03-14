@@ -47,6 +47,15 @@ class Pose:
     def draw(self, img):
         assert self.keypoints.shape == (Pose.num_kpts, 2)
 
+        left_wrist_index = 7
+        right_wrist_index = 4
+
+        x_b, y_b = self.keypoints[left_wrist_index]
+        cv2.circle(img, (int(x_b), int(y_b)), 10, (255, 0, 0), -1)
+
+        x_b, y_b = self.keypoints[right_wrist_index]
+        cv2.circle(img, (int(x_b), int(y_b)), 10, (0, 255, 0), -1)
+
         for part_id in range(len(BODY_PARTS_PAF_IDS) - 2):
             kpt_a_id = BODY_PARTS_KPT_IDS[part_id][0]
             global_kpt_a_id = self.keypoints[kpt_a_id, 0]
