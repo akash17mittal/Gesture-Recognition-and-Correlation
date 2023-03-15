@@ -95,7 +95,10 @@ def run_demo(net, image_provider, height_size, cpu, track, smooth):
   num_keypoints = Pose.num_kpts
   previous_poses = []
   delay = 1
+  count = 0
   for img in image_provider:
+    count += 1
+    print(count)
     orig_img = img.copy()
     heatmaps, pafs, scale, pad = infer_fast(net, img, height_size, stride, upsample_ratio, cpu)
 
@@ -181,7 +184,7 @@ if __name__ == '__main__':
     run_demo(net, frame_provider, args.height_size, args.cpu, args.track, args.smooth)
   except KeyboardInterrupt:
     print(data_points)
-    file_name = f"gesture_data_{int(time.time())}.json"
+    file_name = f"./gesture_data/gesture_data_{int(time.time())}.json"
     json_object = json.dumps(data_points)
     with open(file_name, "w") as outfile:
       outfile.write(json_object)
